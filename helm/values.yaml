@@ -79,34 +79,11 @@ app:
 
   env: []
   envFrom: []
-  additionalVolumeMounts:
-    - name: secret-mount
-      mountPath: /app/.env
-      subPath: development
-      readOnly: true
   lifecycle: {}
 
 sideCars: []
 
-volumes:
-  - name: secret-mount
-    secret:
-      secretName:  DO-DevOps-secret
-
 initContainers: []
-
-job:
-  enabled: false
-  image:
-    repository: curlimages/curl
-    tag: 7.82.0
-  command: ["curl", "https://ifconfig.me"]
-  restartPolicy: Never
-  backoffLimit: 1
-  annotations:
-    "helm.sh/hook": pre-upgrade
-  env: []
-  envFrom: []
 
 podMonitor:
   enabled: false
@@ -127,23 +104,6 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 10
   targetMemoryUtilizationPercentage: 10
-
-keda:
-  enabled: true
-  minReplicaCount: 1
-  maxReplicaCount: 5
-  triggers:
-  - type: prometheus
-    metadata:
-      serverAddress: http://kube-prometheus-1690864423-prometheus.metrics-server:9090
-      metricName: http_requests_total
-      query: sum(rate(http_requests_total{deployment="NZ_APPLICATION-app"}[2m]))
-      threshold: '100.50'
-      activationThreshold: '5.5'
-      namespace: NZ_ENVIRONMENT
-      
-  fallback: {}
-  advanced: {}
 
 nodeSelector: {}
 
